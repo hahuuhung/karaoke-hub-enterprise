@@ -1,0 +1,9 @@
+node_modules/
+dist/
+dist-electron/
+*.log
+.DS_Store
+*.local
+database.sqlite
+database.sqlite-journal
+data/local_db.json
