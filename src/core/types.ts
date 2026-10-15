@@ -135,3 +135,52 @@ export interface OutboxSyncEvent {
   status: 'PENDING' | 'SYNCED' | 'FAILED';
   retryCount: number;
 }
+
+export type StaffRole = 'MANAGER' | 'CASHIER' | 'WAITER';
+
+export interface StaffUser {
+  id: string;
+  name: string;
+  username: string; // Email or phone
+  phone?: string;
+  role: StaffRole;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export type AuditActionType =
+  | 'ALL'
+  | 'PAYMENT'
+  | 'ROOM'
+  | 'FNB'
+  | 'HOSTESS'
+  | 'INVOICE_EDIT'
+  | 'AUTH'
+  | 'CONFIG';
+
+export interface AuditLog {
+  id: string;
+  timestamp: string;
+  who: string;
+  role: string;
+  type: AuditActionType;
+  action: string;
+  detail: string;
+}
+
+export interface VenueSettings {
+  venueName: string;
+  phone: string;
+  address: string;
+  slogan: string;
+  wifiSsid: string;
+  wifiPassword: string;
+  bankId: string;
+  bankAccountNo: string;
+  bankAccountName: string;
+  firstBlockMinutes: number;
+  subsequentBlockMinutes: number;
+  gracePeriodMinutes: number;
+  peakHourSurchargeRate: number;
+}
+

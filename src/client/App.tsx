@@ -1,18 +1,25 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Header } from './components/Header';
+import { Sidebar, NavTab } from './components/Sidebar';
 import { RoomGridView } from './components/RoomGridView';
 import { HostessKanbanView } from './components/HostessKanbanView';
 import { InventoryView } from './components/InventoryView';
 import { OutboxView } from './components/OutboxView';
+import { RevenueReportView } from './components/RevenueReportView';
+import { AuditLogView } from './components/AuditLogView';
+import { StaffRolesView } from './components/StaffRolesView';
+import { VenueSettingsView } from './components/VenueSettingsView';
+
 import { OpenRoomModal } from './components/OpenRoomModal';
 import { OrderModal } from './components/OrderModal';
 import { ReturnAuditModal } from './components/ReturnAuditModal';
 import { TransferModal } from './components/TransferModal';
 import { CheckoutModal } from './components/CheckoutModal';
-import { Room, Hostess, MenuItem, OrderItem, OutboxSyncEvent, Invoice } from '../core/types';
+import { Hostess, MenuItem, OrderItem, OutboxSyncEvent, Invoice } from '../core/types';
+import { RefreshCw, Users, Wifi } from 'lucide-react';
 
 export function App() {
-  const [currentTab, setCurrentTab] = useState<'rooms' | 'hostesses' | 'inventory' | 'sync'>('rooms');
+  const [currentTab, setCurrentTab] = useState<NavTab>('rooms');
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
 
   // Core domain data states
   const [rooms, setRooms] = useState<any[]>([]);
@@ -224,7 +231,10 @@ export function App() {
     }
   };
 
-  const handleToggleHostessStatus = async (hostessId: string, newStatus: 'AVAILABLE' | 'OFF_DUTY') => {
+  const handleToggleHostessStatus = async (
+    hostessId: string,
+    newStatus: 'AVAILABLE' | 'OFF_DUTY'
+  ) => {
     try {
       await fetch('/api/hostesses/status', {
         method: 'POST',
@@ -375,60 +385,143 @@ export function App() {
   const occupiedRooms = rooms.filter((r) => r.status === 'OCCUPIED');
   const availableRooms = rooms.filter((r) => r.status === 'AVAILABLE');
 
+  const tabTitles: Record<NavTab, { title: string; subtitle: string }> = {
+    rooms: {
+      title: 'Sơ đồ phòng hát & Thu ngân',
+      subtitle: 'Quản lý thời gian thực, tính tiền theo block và kiểm đồ trả kho',
+    },
+    hostesses: {
+      title: 'Danh sách tiếp viên & Điều phối',
+      subtitle: 'Hàng chờ luân chuyển công bằng round-robin và tính giờ phục vụ',
+    },
+    inventory: {
+      title: 'Hàng hóa & Thực đơn',
+      subtitle: 'Quản lý giá bán, định mức tồn kho và kiểm kê xuất nhập',
+    },
+    staff: {
+      title: 'Tài khoản & Phân quyền',
+      subtitle: 'Danh sách nhân sự, phân cấp vai trò Quản lý & Thu ngân',
+    },
+    audit: {
+      title: 'Lịch sử hoạt động & Nhật ký thao tác',
+      subtitle: 'Theo dõi toàn bộ vết thay đổi phòng, trả đồ, thanh toán và sửa giá',
+    },
+    reports: {
+      title: 'Thống kê doanh thu & Hiệu suất',
+      subtitle: 'Báo cáo tổng hợp tiền giờ, đồ uống F&B và bảng xếp hạng tiếp viên',
+    },
+    settings: {
+      title: 'Cấu hình quán & Thương hiệu',
+      subtitle: 'Thông tin in hóa đơn K80, mạng WiFi, tài khoản VietQR và quy tắc block',
+    },
+    sync: {
+      title: 'Đồng bộ đám mây Outbox',
+      subtitle: 'Local-First Event Store tự động đồng bộ khi có kết nối mạng Internet',
+    },
+  };
+
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      {/* Top Navigation & Status Header */}
-      <Header
+    <div
+      className={`min-h-screen flex font-sans ${
+        isDarkMode ? 'dark bg-[#0A0E1A] text-[#E8ECF6]' : 'bg-[#F5F6FA] text-slate-800'
+      }`}
+    >
+      {/* Sleek Enterprise Sidebar */}
+      <Sidebar
         currentTab={currentTab}
         onSelectTab={setCurrentTab}
         pendingSyncCount={pendingSyncCount}
-        connectedClients={connectedClients}
-        onRefresh={refreshAll}
         onSeedData={handleSeedData}
+        isDarkMode={isDarkMode}
+        onToggleDarkMode={() => setIsDarkMode(!isDarkMode)}
       />
 
-      {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
-        {currentTab === 'rooms' && (
-          <RoomGridView
-            rooms={rooms}
-            onOpenRoom={(room) => {
-              setSelectedRoom(room);
-              setActiveModal('OPEN_ROOM');
-            }}
-            onOpenOrder={handleOpenOrderModal}
-            onOpenReturnAudit={handleOpenReturnAuditModal}
-            onOpenCheckout={handleOpenCheckoutModal}
-            onTogglePause={handleTogglePause}
-            onOpenTransfer={(room) => {
-              setSelectedRoom(room);
-              setActiveModal('TRANSFER');
-            }}
-            onMarkClean={handleMarkClean}
-          />
-        )}
+      {/* Main Body */}
+      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto">
+        {/* Top Operational Bar */}
+        <header
+          className={`sticky top-0 z-10 px-8 py-4 border-b flex items-center justify-between backdrop-blur-md transition-colors ${
+            isDarkMode
+              ? 'bg-[#0E1322]/90 border-[#1E2640]'
+              : 'bg-white/90 border-slate-200 shadow-sm'
+          }`}
+        >
+          <div>
+            <h1 className="text-base font-extrabold tracking-tight">
+              {tabTitles[currentTab].title}
+            </h1>
+            <p className="text-xs text-slate-400 mt-0.5">
+              {tabTitles[currentTab].subtitle}
+            </p>
+          </div>
 
-        {currentTab === 'hostesses' && (
-          <HostessKanbanView
-            hostesses={hostesses}
-            availableQueue={availableQueue}
-            occupiedRooms={occupiedRooms}
-            onDispatchHostess={handleDispatchHostess}
-            onCheckoutHostess={handleCheckoutHostess}
-            onToggleStatus={handleToggleHostessStatus}
-          />
-        )}
+          <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-slate-100 text-slate-600 text-[11px] font-medium border border-slate-200">
+              <Users className="w-3.5 h-3.5 text-[#5847D9]" />
+              <span>{connectedClients} Thiết bị LAN</span>
+            </div>
 
-        {currentTab === 'inventory' && <InventoryView menuItems={menuItems} />}
+            <button
+              onClick={refreshAll}
+              className="p-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 border border-slate-200 transition"
+              title="Làm mới dữ liệu"
+            >
+              <RefreshCw className="w-4 h-4" />
+            </button>
+          </div>
+        </header>
 
-        {currentTab === 'sync' && (
-          <OutboxView
-            events={outboxEvents}
-            onFlush={handleFlushOutbox}
-            isFlushing={isFlushing}
-          />
-        )}
-      </main>
+        {/* View Contents */}
+        <main className="flex-1 p-6 lg:p-8 max-w-7xl w-full mx-auto space-y-6">
+          {currentTab === 'rooms' && (
+            <RoomGridView
+              rooms={rooms}
+              onOpenRoom={(room) => {
+                setSelectedRoom(room);
+                setActiveModal('OPEN_ROOM');
+              }}
+              onOpenOrder={handleOpenOrderModal}
+              onOpenReturnAudit={handleOpenReturnAuditModal}
+              onOpenCheckout={handleOpenCheckoutModal}
+              onTogglePause={handleTogglePause}
+              onOpenTransfer={(room) => {
+                setSelectedRoom(room);
+                setActiveModal('TRANSFER');
+              }}
+              onMarkClean={handleMarkClean}
+            />
+          )}
+
+          {currentTab === 'hostesses' && (
+            <HostessKanbanView
+              hostesses={hostesses}
+              availableQueue={availableQueue}
+              occupiedRooms={occupiedRooms}
+              onDispatchHostess={handleDispatchHostess}
+              onCheckoutHostess={handleCheckoutHostess}
+              onToggleStatus={handleToggleHostessStatus}
+            />
+          )}
+
+          {currentTab === 'inventory' && <InventoryView menuItems={menuItems} />}
+
+          {currentTab === 'staff' && <StaffRolesView />}
+
+          {currentTab === 'audit' && <AuditLogView />}
+
+          {currentTab === 'reports' && <RevenueReportView />}
+
+          {currentTab === 'settings' && <VenueSettingsView />}
+
+          {currentTab === 'sync' && (
+            <OutboxView
+              events={outboxEvents}
+              onFlush={handleFlushOutbox}
+              isFlushing={isFlushing}
+            />
+          )}
+        </main>
+      </div>
 
       {/* Modal Dialogs */}
       {activeModal === 'OPEN_ROOM' && selectedRoom && (

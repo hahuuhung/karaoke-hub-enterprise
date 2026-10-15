@@ -9,6 +9,10 @@ import {
   OrderItem,
   Invoice,
   OutboxSyncEvent,
+  StaffUser,
+  AuditLog,
+  AuditActionType,
+  VenueSettings,
 } from '../core/types';
 import { logger } from './logger';
 import { generateSampleData } from './mockData';
@@ -22,6 +26,9 @@ export interface DatabaseState {
   orderItems: OrderItem[];
   invoices: Invoice[];
   outbox: OutboxSyncEvent[];
+  staffUsers: StaffUser[];
+  auditLogs: AuditLog[];
+  settings: VenueSettings;
 }
 
 const DATA_DIR = path.join(process.cwd(), 'data');
@@ -64,6 +71,28 @@ const INITIAL_MENU: MenuItem[] = [
   { id: 'm10', code: 'DOAN04', name: 'Hạt Điều Rang Muối', category: 'SNACK', unit: 'Hộp', price: 65000, stockQuantity: 70 },
 ];
 
+const INITIAL_SETTINGS: VenueSettings = {
+  venueName: 'KARAOKE LUXURY ENTERPRISE',
+  phone: '0988.888.999',
+  address: 'Số 68 Đường Hoàng Ngân, Cầu Giấy, Hà Nội',
+  slogan: 'Đỉnh Cao Âm Thanh - Đẳng Cấp Thượng Lưu',
+  wifiSsid: 'KARAOKE_LUXURY_VIP',
+  wifiPassword: 'karaokeluxury@888',
+  bankId: 'MB',
+  bankAccountNo: '0999999999',
+  bankAccountName: 'KARAOKE LUXURY ENTERPRISE',
+  firstBlockMinutes: 60,
+  subsequentBlockMinutes: 15,
+  gracePeriodMinutes: 10,
+  peakHourSurchargeRate: 1.2,
+};
+
+const INITIAL_STAFF: StaffUser[] = [
+  { id: 'u01', name: 'Phùng Học', username: 'quanly@karaoke.com', phone: '0988.111.222', role: 'MANAGER', isActive: true, createdAt: new Date(Date.now() - 86400000 * 30).toISOString() },
+  { id: 'u02', name: 'Trần Thanh Thảo', username: 'thungan@karaoke.com', phone: '0977.333.444', role: 'CASHIER', isActive: true, createdAt: new Date(Date.now() - 86400000 * 15).toISOString() },
+  { id: 'u03', name: 'Nguyễn Văn Nam', username: 'phucvu@karaoke.com', phone: '0912.444.555', role: 'WAITER', isActive: true, createdAt: new Date(Date.now() - 86400000 * 5).toISOString() },
+];
+
 export class LocalDatabase {
   private state: DatabaseState;
 
@@ -83,7 +112,12 @@ export class LocalDatabase {
       try {
         const raw = fs.readFileSync(DB_FILE, 'utf-8');
         logger.info('Loaded existing database from disk');
-        return JSON.parse(raw);
+        const parsed = JSON.parse(raw);
+        // Ensure new collections exist if older local_db.json is loaded
+        if (!parsed.staffUsers) parsed.staffUsers = INITIAL_STAFF;
+        if (!parsed.settings) parsed.settings = INITIAL_SETTINGS;
+        if (!parsed.auditLogs) parsed.auditLogs = [];
+        return parsed;
       } catch (err) {
         logger.error({ err }, 'Failed to parse database file, resetting to initial seed');
       }
@@ -98,6 +132,9 @@ export class LocalDatabase {
       orderItems: [],
       invoices: [],
       outbox: [],
+      staffUsers: INITIAL_STAFF,
+      auditLogs: [],
+      settings: INITIAL_SETTINGS,
     };
 
     this.saveToDisk(initialState);
@@ -130,6 +167,22 @@ export class LocalDatabase {
     this.state.outbox.unshift(event);
     this.saveToDisk();
     return event;
+  }
+
+  public addAuditLog(who: string, role: string, type: AuditActionType, action: string, detail: string) {
+    const log: AuditLog = {
+      id: `audit_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      timestamp: new Date().toISOString(),
+      who,
+      role,
+      type,
+      action,
+      detail,
+    };
+    if (!this.state.auditLogs) this.state.auditLogs = [];
+    this.state.auditLogs.unshift(log);
+    this.saveToDisk();
+    return log;
   }
 
   public resetWithSampleData() {

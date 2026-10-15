@@ -7,3 +7,6 @@ dist-electron/
 database.sqlite
 database.sqlite-journal
 data/local_db.json
+unbundled_screens/
+extracted_screens/
+Karaoke Luxury*.html

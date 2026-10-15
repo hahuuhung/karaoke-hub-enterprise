@@ -7,6 +7,9 @@ import {
   OrderItem,
   Invoice,
   OutboxSyncEvent,
+  StaffUser,
+  VenueSettings,
+  AuditLog,
 } from '../core/types';
 import { DatabaseState } from './db';
 
@@ -572,6 +575,145 @@ export function generateSampleData(): DatabaseState {
     },
   ];
 
+  const staffUsers: StaffUser[] = [
+    {
+      id: 'u01',
+      name: 'Phùng Học',
+      username: 'quanly@karaoke.com',
+      phone: '0988.111.222',
+      role: 'MANAGER',
+      isActive: true,
+      createdAt: minutesAgo(86400 * 30),
+    },
+    {
+      id: 'u02',
+      name: 'Trần Thanh Thảo',
+      username: 'thungan@karaoke.com',
+      phone: '0977.333.444',
+      role: 'CASHIER',
+      isActive: true,
+      createdAt: minutesAgo(86400 * 15),
+    },
+    {
+      id: 'u03',
+      name: 'Nguyễn Văn Nam',
+      username: 'phucvu@karaoke.com',
+      phone: '0912.444.555',
+      role: 'WAITER',
+      isActive: true,
+      createdAt: minutesAgo(86400 * 5),
+    },
+  ];
+
+  const settings: VenueSettings = {
+    venueName: 'KARAOKE LUXURY ENTERPRISE',
+    phone: '0988.888.999',
+    address: 'Số 68 Đường Hoàng Ngân, Cầu Giấy, Hà Nội',
+    slogan: 'Đỉnh Cao Âm Thanh - Đẳng Cấp Thượng Lưu',
+    wifiSsid: 'KARAOKE_LUXURY_VIP',
+    wifiPassword: 'karaokeluxury@888',
+    bankId: 'MB',
+    bankAccountNo: '0999999999',
+    bankAccountName: 'KARAOKE LUXURY ENTERPRISE',
+    firstBlockMinutes: 60,
+    subsequentBlockMinutes: 15,
+    gracePeriodMinutes: 10,
+    peakHourSurchargeRate: 1.2,
+  };
+
+  const auditLogs: AuditLog[] = [
+    {
+      id: 'audit_01',
+      timestamp: minutesAgo(5),
+      who: 'Trần Thanh Thảo',
+      role: 'Thu ngân',
+      type: 'PAYMENT',
+      action: 'Thanh toán hóa đơn',
+      detail: 'Chốt bill Phòng VIP 01 - Hóa đơn INV-882310: 1.750.000 đ (VietQR)',
+    },
+    {
+      id: 'audit_02',
+      timestamp: minutesAgo(12),
+      who: 'Trần Thanh Thảo',
+      role: 'Thu ngân',
+      type: 'ROOM',
+      action: 'Chuyển trạng thái dọn dẹp',
+      detail: 'Chuyển Phòng VIP 03 sang trạng thái Chờ dọn dẹp',
+    },
+    {
+      id: 'audit_03',
+      timestamp: minutesAgo(40),
+      who: 'Phùng Học',
+      role: 'Quản lý',
+      type: 'FNB',
+      action: 'Gọi hàng hóa F&B',
+      detail: 'Xuất 12 lon Tiger Crystal, 1 hạt điều vào Phòng 102',
+    },
+    {
+      id: 'audit_04',
+      timestamp: minutesAgo(45),
+      who: 'Phùng Học',
+      role: 'Quản lý',
+      type: 'HOSTESS',
+      action: 'Điều phối tiếp viên',
+      detail: 'Điều tiếp viên Kim Anh (Tổ 2) vào Phòng 102',
+    },
+    {
+      id: 'audit_05',
+      timestamp: minutesAgo(48),
+      who: 'Phùng Học',
+      role: 'Quản lý',
+      type: 'ROOM',
+      action: 'Mở phòng hát',
+      detail: 'Mở Phòng 102 (Standard) cho khách Anh Quang',
+    },
+    {
+      id: 'audit_06',
+      timestamp: minutesAgo(65),
+      who: 'Trần Thanh Thảo',
+      role: 'Thu ngân',
+      type: 'FNB',
+      action: 'Gọi hàng hóa F&B',
+      detail: 'Xuất 18 chai Corona Extra, 2 đĩa trái cây, 2 mực trứng vào Phòng Party 01',
+    },
+    {
+      id: 'audit_07',
+      timestamp: minutesAgo(70),
+      who: 'Trần Thanh Thảo',
+      role: 'Thu ngân',
+      type: 'HOSTESS',
+      action: 'Điều phối tiếp viên',
+      detail: 'Điều tiếp viên Kiều Oanh & Cẩm Tú vào Phòng Party 01',
+    },
+    {
+      id: 'audit_08',
+      timestamp: minutesAgo(70),
+      who: 'Trần Thanh Thảo',
+      role: 'Thu ngân',
+      type: 'ROOM',
+      action: 'Mở phòng hát',
+      detail: 'Mở Phòng Sân Khấu Party 01 cho khách Chị Lan',
+    },
+    {
+      id: 'audit_09',
+      timestamp: minutesAgo(135),
+      who: 'Phùng Học',
+      role: 'Quản lý',
+      type: 'ROOM',
+      action: 'Mở phòng hát',
+      detail: 'Mở Phòng VIP 02 cho khách Anh Minh (VIP Gold)',
+    },
+    {
+      id: 'audit_10',
+      timestamp: minutesAgo(180),
+      who: 'Phùng Học',
+      role: 'Quản lý',
+      type: 'AUTH',
+      action: 'Đăng nhập hệ thống',
+      detail: 'Bắt đầu ca trực quản lý buổi chiều/tối',
+    },
+  ];
+
   return {
     rooms,
     sessions,
@@ -581,5 +723,8 @@ export function generateSampleData(): DatabaseState {
     orderItems,
     invoices,
     outbox,
+    staffUsers,
+    auditLogs,
+    settings,
   };
 }
