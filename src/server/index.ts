@@ -48,6 +48,21 @@ async function startServer() {
     };
   });
 
+  // Seed sample demo data endpoint
+  server.post('/api/seed', async () => {
+    const newState = db.resetWithSampleData();
+    wsHub.broadcast('ROOM_UPDATE', { message: 'Seed data loaded' });
+    wsHub.broadcast('HOSTESS_UPDATE', { message: 'Seed data loaded' });
+    wsHub.broadcast('ORDER_UPDATE', { message: 'Seed data loaded' });
+    logger.info('Sample demo data seeded and broadcasted to clients');
+    return {
+      success: true,
+      message: 'Đã nạp thành công bộ dữ liệu mẫu thực tế!',
+      roomsCount: newState.rooms.length,
+      hostessesCount: newState.hostesses.length,
+    };
+  });
+
   // -------------------------------------------------------------
   // ROOMS & SESSIONS API
   // -------------------------------------------------------------

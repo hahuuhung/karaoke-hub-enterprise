@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Mic2, Users, PackageCheck, Cloud, Wifi, Clock, RefreshCw } from 'lucide-react';
+import { Mic2, Users, PackageCheck, Cloud, Wifi, Clock, RefreshCw, Sparkles } from 'lucide-react';
 
 interface HeaderProps {
   currentTab: 'rooms' | 'hostesses' | 'inventory' | 'sync';
@@ -7,6 +7,7 @@ interface HeaderProps {
   pendingSyncCount: number;
   connectedClients: number;
   onRefresh: () => void;
+  onSeedData: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -15,6 +16,7 @@ export const Header: React.FC<HeaderProps> = ({
   pendingSyncCount,
   connectedClients,
   onRefresh,
+  onSeedData,
 }) => {
   const [time, setTime] = useState<string>('');
 
@@ -120,6 +122,15 @@ export const Header: React.FC<HeaderProps> = ({
               <Wifi className="w-3.5 h-3.5" />
               <span>LAN 0ms</span>
             </div>
+
+            <button
+              onClick={onSeedData}
+              title="Khôi phục & nạp bộ dữ liệu mẫu thực tế"
+              className="flex items-center space-x-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-lg text-xs font-bold shadow-sm shadow-amber-500/20 transition-all"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Dữ Liệu Mẫu</span>
+            </button>
 
             <button
               onClick={onRefresh}

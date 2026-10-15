@@ -11,6 +11,7 @@ import {
   OutboxSyncEvent,
 } from '../core/types';
 import { logger } from './logger';
+import { generateSampleData } from './mockData';
 
 export interface DatabaseState {
   rooms: Room[];
@@ -129,6 +130,13 @@ export class LocalDatabase {
     this.state.outbox.unshift(event);
     this.saveToDisk();
     return event;
+  }
+
+  public resetWithSampleData() {
+    this.state = generateSampleData();
+    this.saveToDisk();
+    logger.info('Database reset with realistic sample demo data');
+    return this.state;
   }
 }
 

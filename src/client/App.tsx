@@ -354,6 +354,23 @@ export function App() {
     }
   };
 
+  // -------------------------------------------------------------
+  // Seed Sample Data
+  // -------------------------------------------------------------
+  const handleSeedData = async () => {
+    try {
+      const res = await fetch('/api/seed', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (res.ok) {
+        refreshAll();
+      }
+    } catch (err) {
+      console.error('Failed to seed sample data', err);
+    }
+  };
+
   const pendingSyncCount = outboxEvents.filter((e) => e.status === 'PENDING').length;
   const occupiedRooms = rooms.filter((r) => r.status === 'OCCUPIED');
   const availableRooms = rooms.filter((r) => r.status === 'AVAILABLE');
@@ -367,6 +384,7 @@ export function App() {
         pendingSyncCount={pendingSyncCount}
         connectedClients={connectedClients}
         onRefresh={refreshAll}
+        onSeedData={handleSeedData}
       />
 
       {/* Main Content Area */}
